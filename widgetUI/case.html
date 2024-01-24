@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Case Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            width: 300px;
+            height: 400px;
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 20px;
+            border: 1px solid #fff; /* White border added */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .header {
+            background-color: #4b3f72; /* Dark purple header */
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            border-top-left-radius: 15px; /* Rounded corners for header */
+            border-top-right-radius: 15px;
+        }
+
+        .main-content {
+            padding: 20px 25px; /* Padding for the content */
+            flex-grow: 1; /* Ensures it takes up available space */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Pushes the button down */
+        }
+
+        textarea {
+            width: 100%;
+            height: 220px; /* Adjust as needed */
+            padding: 10px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            resize: none;
+            
+        }
+
+        button {
+            width: 100%;
+            padding: 12px 20px;
+            background-color: #4b3f72; /* Bootstrap primary color */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background-color: #0056b3; /* Slightly darker blue */
+        }
+
+        button:active {
+            background-color: #003d82; /* Even darker blue */
+        }
+
+        button:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.5); /* Light blue shadow */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">Hello, <span id="greeting"></span></div>
+        <div class="main-content">
+            <textarea id="caseDetails" placeholder="Tell me about your case"></textarea>
+            <button type="button" id="submitCase">Submit</button>
+        </div>
+    </div>
+
+    <script>
+
+        var case_id;
+        // Function to get URL parameters
+        function getQueryParam(param) {
+            var queryString = window.location.search.substring(1);
+            var queries = queryString.split("&");
+            for (var i = 0; i < queries.length; i++) {
+                var pair = queries[i].split("=");
+                if (pair[0] === param) return decodeURIComponent(pair[1]);
+            }
+            return '';
+        }
+
+        // Set the name in the greeting
+        document.getElementById('greeting').innerText += getQueryParam('name');
+
+        var userId = getQueryParam('userId');
+
+        // Event listener for the submit button
+        document.getElementById('submitCase').addEventListener('click', function() {
+            var caseContent = document.getElementById('caseDetails').value;
+
+            // Prepare the cased data
+            var caseData = {
+                userId: userId,
+                content: caseContent,
+                createdTimestamp: new Date().toISOString(),
+                lastChangedTimestamp: new Date().toISOString()
+            };
+
+            // Send the request
+            fetch('http://localhost:8080/cases', {
+                method: 'POST',
+                headers: {
+                    'Content-type': 'application/json',
+                },
+                body: JSON.stringify(caseData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Case submitted: ', data);
+                
+                case_id = data.caseId;
+
+                if(!case_id) {
+                    throw new Error('Case Id not received from the server');
+                }
+
+                return fetch('http://localhost:3000/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-type': 'application/json',
+                    },
+                    body: JSON.stringify({ query: caseContent})
+                })
+            })
+            .then(response => response.json())
+            .then(apiResponse => {
+                // Extracting the 'content' from the response
+                const responseText = apiResponse.response.message.content;
+
+                // Redirect to chat.html with the case content and the extracted response text
+                window.location.href = `chat.html?caseContent=${encodeURIComponent(caseContent)}&apiResponse=${encodeURIComponent(responseText)}&caseId=${encodeURIComponent(case_id)}`;
+            })
+            .catch(error => {
+                console.error('Error:' , error);
+            });
+        });
+    </script>
+</body>
+</html>

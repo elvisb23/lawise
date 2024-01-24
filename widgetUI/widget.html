@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Enhanced Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .form-container {
+            width: 300px;
+            height: 400px;
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 20px; /* Rounded corners */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Space elements evenly */
+        }
+
+        .form-header {
+            background-color: #4b3f72; /* Dark purple header */
+            color: white;
+            padding: 20px;
+            border-top-left-radius: 15px; /* Rounded corners for header */
+            border-top-right-radius: 15px;
+            text-align: center;
+        }
+
+        .form-caption {
+            text-align: center;
+            font-size: 14px;
+            margin-top: -20px; /* Adjust as needed */
+            color: #333;
+        }
+
+        .form-group {
+            position: relative; /* For absolute positioning of the icons */
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: none; /* Hide labels to match the design */
+        }
+
+        input[type="text"], input[type="email"], input[type="tel"], textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 10px; /* Rounded corners for inputs */
+            box-sizing: border-box;
+            margin-bottom: 20px; /* Space between inputs */
+        }
+
+        textarea {
+            resize: none; /* Prevent resizing of the textarea */
+            height: 100px; /* Fixed height for textarea */
+        }
+
+        button {
+            width: 100%;
+            padding: 12px 20px;
+            background-color: #4b3f72; /* Matching the header color */
+            color: white;
+            border: none;
+            border-radius: 10px; /* Rounded corners for button */
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #403164; /* Slightly darker purple on hover */
+        }
+
+        button:active {
+            background-color: #32254a; /* Even darker purple on active */
+        }
+
+        /* Placeholder text styling */
+        ::placeholder {
+            color: #888; /* Light grey text */
+            font-style: italic;
+        }
+
+        /* Remove arrows for number inputs on the side */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* input[type="number"] {
+            -moz-appearance: textfield;
+        } */
+    </style>
+
+
+</head>
+<body>
+    
+    <div class="form-container">
+        <div class="form-header">
+            Want to chat?
+            <div>Lawbot is here to help!</div>
+        </div>
+        <form id="userForm">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" placeholder="Name">
+            </div>
+            <div class="form-group">
+                <label for="surname">Surname</label>
+                <input type="text" id="surname" name="surname" placeholder="Surname">
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="Email">
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" name="phone" placeholder="Phone Number">
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('userForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            // Gather data from the form
+            var userData = {
+                name: document.getElementById('name').value,
+                surname: document.getElementById('surname').value,
+                email: document.getElementById('email').value,
+                phoneNumber: document.getElementById('phone').value
+            };
+
+            // Send data to your endpoint
+            fetch('http://localhost:8080/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(userData)
+            })
+            .then(console.log(JSON.stringify(userData)))
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                var userId = data.id;
+                var userName = encodeURIComponent(document.getElementById('name').value);
+                var userSurname = encodeURIComponent(document.getElementById('surname').value);
+                var email = encodeURIComponent(document.getElementById('email').value);
+                var phoneNumber = encodeURIComponent(document.getElementById('phone').value);
+
+                window.location.href = 'case.html?name=' + userName + '&userId=' + userId + '&surname=' + surname + '&email=' + email + '&phon';
+
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
